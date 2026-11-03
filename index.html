@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NoteFlow</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body data-theme="light">
+
+    <header class="topbar">
+        <a class="brand" href="#">
+            <div class="brand-icon"><span>♫</span></div>
+            <span>NoteFlow</span>
+        </a>
+
+        <div class="header-actions">
+            <button class="icon-button" id="settingsButton" title="Impostazioni">⚙</button>
+            <div class="avatar">N</div>
+        </div>
+    </header>
+
+    <main class="main-container">
+
+        <section class="hero">
+            <span class="eyebrow">IL TUO ASSISTENTE MUSICALE</span>
+            <h1>Scopri le note della tua musica.</h1>
+            <p>Carica un brano e osserva le note mentre viene riprodotto.</p>
+        </section>
+
+        <section class="upload-section">
+            <div class="drop-zone" id="dropZone">
+                <div class="upload-icon">↑</div>
+                <h2>Carica un brano musicale</h2>
+                <p>Trascina qui un file audio o video</p>
+                <button class="primary-button" id="chooseFileButton">Seleziona file</button>
+                <span class="file-types">MP3, WAV, M4A, OGG, MP4, WEBM</span>
+                <input type="file" id="fileInput" accept="audio/*,video/*" hidden>
+            </div>
+            <div class="selected-file hidden" id="selectedFile">
+                <div class="file-symbol">♫</div>
+                <div class="file-info">
+                    <strong id="fileName">Nessun file</strong>
+                    <span id="fileSize"></span>
+                </div>
+                <button class="icon-button" id="removeFileButton" title="Rimuovi file">✕</button>
+            </div>
+        </section>
+
+        <section class="workspace hidden" id="workspace">
+
+            <div class="player-card">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">RIPRODUZIONE</span>
+                        <h2>Il tuo brano</h2>
+                    </div>
+                    <span class="status-pill" id="statusText">In pausa</span>
+                </div>
+
+                <div class="media-wrapper" id="mediaWrapper">
+                    <audio id="audioPlayer" controls></audio>
+                    <video id="videoPlayer" controls class="hidden"></video>
+                </div>
+
+                <div class="player-options">
+                    <label for="playbackSpeed">Velocità</label>
+                    <select id="playbackSpeed">
+                        <option value="0.5">0.5x</option>
+                        <option value="0.75">0.75x</option>
+                        <option value="1" selected>1x</option>
+                        <option value="1.25">1.25x</option>
+                        <option value="1.5">1.5x</option>
+                        <option value="2">2x</option>
+                    </select>
+                    <span class="player-hint" id="analysisStatus">In attesa della riproduzione</span>
+                </div>
+            </div>
+
+            <div class="analysis-grid">
+                <section class="current-card">
+                    <div class="section-heading">
+                        <div>
+                            <span class="eyebrow">RICONOSCIMENTO LIVE</span>
+                            <h2>Nota attuale</h2>
+                        </div>
+                        <span class="live-indicator" id="liveIndicator"></span>
+                    </div>
+
+                    <div class="note-display">
+                        <div class="note-name" id="currentNote">--</div>
+                        <div class="note-details" id="noteDetails">Riproduci il brano per iniziare</div>
+                    </div>
+
+                    <div class="metrics">
+                        <div class="metric">
+                            <span>Frequenza</span>
+                            <strong id="frequencyValue">-- Hz</strong>
+                        </div>
+                        <div class="metric">
+                            <span>Affidabilità</span>
+                            <strong id="confidenceValue">--</strong>
+                        </div>
+                    </div>
+
+                    <div class="meter">
+                        <div class="meter-fill" id="meterFill"></div>
+                    </div>
+                </section>
+
+                <section class="keyboard-card">
+                    <div class="section-heading">
+                        <div>
+                            <span class="eyebrow">TASTIERA VIRTUALE</span>
+                            <h2>Note sul pianoforte</h2>
+                        </div>
+                    </div>
+                    <div class="keyboard-scroll">
+                        <div class="piano" id="pianoKeyboard"></div>
+                    </div>
+                    <p class="keyboard-caption">Il tasto evidenziato indica la nota riconosciuta.</p>
+                </section>
+            </div>
+
+            <section class="karaoke-card">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">SEQUENZA MUSICALE</span>
+                        <h2>Karaoke delle note</h2>
+                    </div>
+                    <span class="count-label" id="sequenceCount">0 note</span>
+                </div>
+                <p class="section-description">Le note appaiono in ordine di riproduzione. Ogni nota mantiene la propria durata.</p>
+                <div class="karaoke-display" id="karaokeDisplay">
+                    <span class="empty-message">Le note riconosciute appariranno qui.</span>
+                </div>
+            </section>
+
+            <section class="summary-card">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">RIEPILOGO</span>
+                        <h2>Tutte le note del brano</h2>
+                    </div>
+                    <span class="count-label" id="uniqueCount">0 note diverse</span>
+                </div>
+                <p class="section-description">Ogni nota compare una sola volta, ordinata dalla più grave alla più acuta.</p>
+                <div class="summary-list" id="summaryList">
+                    <span class="empty-message">Il riepilogo apparirà durante l'analisi.</span>
+                </div>
+            </section>
+
+            <section class="history-card">
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">ATTIVITÀ</span>
+                        <h2>Ultime note rilevate</h2>
+                    </div>
+                    <button class="text-button" id="clearHistory">Pulisci</button>
+                </div>
+                <div class="history-list" id="noteHistory">
+                    <span class="empty-message">Nessuna nota rilevata.</span>
+                </div>
+            </section>
+
+        </section>
+
+        <section class="tools-section">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">NOTEFlow TOOLS</span>
+                    <h2>Strumenti musicali</h2>
+                </div>
+            </div>
+
+            <div class="tools-grid">
+                <div class="tool-card active-tool">
+                    <div class="tool-icon">♫</div>
+                    <h3>Riconoscimento note</h3>
+                    <p>Individua l'altezza delle note durante la riproduzione.</p>
+                    <span class="tool-status">Disponibile</span>
+                </div>
+
+                <div class="tool-card active-tool">
+                    <div class="tool-icon">▤</div>
+                    <h3>Modalità karaoke</h3>
+                    <p>Segui la sequenza delle note del tuo brano.</p>
+                    <span class="tool-status">Disponibile</span>
+                </div>
+
+                <div class="tool-card active-tool">
+                    <div class="tool-icon">▥</div>
+                    <h3>Tastiera virtuale</h3>
+                    <p>Visualizza le note riconosciute sulla tastiera.</p>
+                    <span class="tool-status">Disponibile</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div class="modal-overlay hidden" id="settingsModal">
+        <div class="settings-modal">
+            <div class="modal-header">
+                <div>
+                    <span class="eyebrow">PERSONALIZZAZIONE</span>
+                    <h2>Impostazioni</h2>
+                </div>
+                <button class="icon-button" id="closeSettings">✕</button>
+            </div>
+
+            <div class="setting-group">
+                <label for="themeSelect">Aspetto</label>
+                <select id="themeSelect">
+                    <option value="light">Modalità chiara</option>
+                    <option value="dark">Modalità scura</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label for="sensitivitySelect">Sensibilità del rilevamento</label>
+                <select id="sensitivitySelect">
+                    <option value="low">Bassa</option>
+                    <option value="medium" selected>Normale</option>
+                    <option value="high">Alta</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label for="stabilitySelect">Stabilità della nota</label>
+                <select id="stabilitySelect">
+                    <option value="180">Rapida</option>
+                    <option value="280" selected>Bilanciata</option>
+                    <option value="450">Precisa</option>
+                    <option value="650">Molto stabile</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label for="updateSelect">Velocità di aggiornamento</label>
+                <select id="updateSelect">
+                    <option value="45">45 ms</option>
+                    <option value="70" selected>70 ms</option>
+                    <option value="100">100 ms</option>
+                    <option value="140">140 ms</option>
+                </select>
+            </div>
+
+            <div class="setting-group">
+                <label for="notationSelect">Notazione musicale</label>
+                <select id="notationSelect">
+                    <option value="sharp" selected>Diesis (DO♯)</option>
+                    <option value="flat">Bemolle (RE♭)</option>
+                </select>
+            </div>
+
+            <label class="toggle-setting">
+                <span>
+                    <strong>Mostra frequenza</strong>
+                    <small>Visualizza gli Hz della nota riconosciuta.</small>
+                </span>
+                <input type="checkbox" id="showFrequency" checked>
+            </label>
+
+            <button class="primary-button save-button" id="saveSettings">Salva impostazioni</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
